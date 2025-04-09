@@ -1,0 +1,67 @@
+body {
+    padding: 10px;
+    color: var(--vscode-foreground);
+    background-color: var(--vscode-sideBar-background); /* Fondo de la barra lateral */
+    font-family: var(--vscode-font-family);
+    font-size: var(--vscode-font-size);
+}
+
+#search-box {
+    width: calc(100% - 10px); /* Ajusta el ancho */
+    padding: 5px;
+    margin-bottom: 10px;
+    border: 1px solid var(--vscode-input-border);
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+}
+
+ #search-box:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+ }
+
+
+#file-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: calc(100vh - 100px); /* Ajusta altura máxima para scroll */
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+#file-list li {
+    margin-bottom: 5px;
+    display: flex; /* Para alinear checkbox y texto */
+    align-items: center;
+    cursor: pointer; /* Para indicar que se puede hacer clic */
+    padding: 3px;
+    border-radius: 3px;
+}
+ #file-list li:hover {
+    background-color: var(--vscode-list-hoverBackground);
+ }
+
+#file-list input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+/* Estilo para ocultar elementos durante la búsqueda */
+.hidden {
+    display: none;
+}
+
+
+button {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    cursor: pointer;
+    text-align: center;
+    border-radius: 2px;
+}
+
+button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}

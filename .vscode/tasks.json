@@ -1,0 +1,42 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "npm: compile",
+			"type": "npm",
+			"script": "compile",
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "Runs the compile script defined in package.json"
+		},
+		{
+			"label": "npm: watch",
+			"type": "npm",
+			"script": "watch",
+			"isBackground": true,
+			"presentation": {
+				"reveal": "always"
+			},
+			"problemMatcher": {
+				"owner": "esbuild-watch",
+				"pattern": {
+					"regexp": "^\\s*>\\s*(.*):(\\d+):(\\d+):\\s*(error|warning):\\s*(.*)$",
+					"file": 1,
+					"line": 2,
+					"column": 3,
+					"severity": 4,
+					"message": 5
+				},
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "^\\[watch\\] build started$",
+					"endsPattern": "^\\[watch\\] build finished$"
+				}
+			},
+			"detail": "Runs the watch script defined in package.json"
+		}
+	]
+}
