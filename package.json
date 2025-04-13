@@ -2,7 +2,7 @@
   "name": "prompt-file-builder",
   "displayName": "Prompt File Builder",
   "description": "Select files from your workspace, add a custom prompt, and generate a combined 'prompt.txt' file.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "AgustinBereciartuaCastillo",
   "engines": {
     "vscode": "^1.80.0"
@@ -38,10 +38,11 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run compile && npm run copy-webview",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "lint": "eslint src --ext ts"
+    "lint": "eslint src --ext ts",
+    "copy-webview": "mkdir -p dist/webview && cp -r src/webview/* dist/webview/"
   },
   "devDependencies": {
     "@types/vscode": "^1.80.0",

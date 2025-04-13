@@ -37,7 +37,9 @@ class PromptFileBuilderViewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.options = {
       enableScripts: true,
       localResourceRoots: [
-        vscode.Uri.joinPath(this._extensionUri, 'src', 'webview'),
+        vscode.Uri.joinPath(this._extensionUri, 'webview'),
+        vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview'),
+        this._extensionUri
       ],
     };
 
@@ -97,12 +99,38 @@ class PromptFileBuilderViewProvider implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(webview: vscode.Webview): string {
-    const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'main.js')
-    );
-    const styleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'style.css')
-    );
+    // Intenta diferentes posibles ubicaciones para los recursos
+    let scriptUri;
+    let styleUri;
+    
+    try {
+      // Intenta primero con rutas relativas a la raíz de la extensión
+      scriptUri = webview.asWebviewUri(
+        vscode.Uri.joinPath(this._extensionUri, 'webview', 'main.js')
+      );
+      styleUri = webview.asWebviewUri(
+        vscode.Uri.joinPath(this._extensionUri, 'webview', 'style.css')
+      );
+    } catch (error) {
+      try {
+        // Intenta con la carpeta dist
+        scriptUri = webview.asWebviewUri(
+          vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview', 'main.js')
+        );
+        styleUri = webview.asWebviewUri(
+          vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview', 'style.css')
+        );
+      } catch (innerError) {
+        // Fallback a la estructura original
+        scriptUri = webview.asWebviewUri(
+          vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'main.js')
+        );
+        styleUri = webview.asWebviewUri(
+          vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'style.css')
+        );
+      }
+    }
+
     const nonce = getNonce();
 
     return `<!DOCTYPE html>
@@ -149,7 +177,6 @@ async function copySelectedFilesContent(selectedFiles: string[], prompt: string)
     combinedContent += '--- Files Start Here ---\n\n';
   }
 
-
   try {
     await vscode.window.withProgress(
       {
@@ -163,9 +190,9 @@ async function copySelectedFilesContent(selectedFiles: string[], prompt: string)
         let processedFiles = 0;
 
         if (!Array.isArray(selectedFiles)) {
-             console.error("selectedFiles is not an array:", selectedFiles);
-             vscode.window.showErrorMessage("Internal error: Invalid file list.");
-             return;
+          console.error("selectedFiles is not an array:", selectedFiles);
+          vscode.window.showErrorMessage("Internal error: Invalid file list.");
+          return;
         }
 
         for (const relativePath of selectedFiles) {
@@ -190,9 +217,10 @@ async function copySelectedFilesContent(selectedFiles: string[], prompt: string)
             combinedContent += `--- START FILE: ${relativePath} ---\n\n`;
             combinedContent += fileContent;
             combinedContent += `\n\n--- END FILE: ${relativePath} ---\n\n`;
-          } catch (readError: any) {
-            console.error(`Error reading file ${relativePath}:`, readError);
-            combinedContent += `--- ERROR READING FILE: ${relativePath} (${readError.message || 'Unknown error'}) ---\n\n`;
+          } catch (error) {
+            console.error(`Error reading file ${relativePath}:`, error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            combinedContent += `--- ERROR READING FILE: ${relativePath} (${errorMessage}) ---\n\n`;
           }
         }
 
@@ -206,10 +234,11 @@ async function copySelectedFilesContent(selectedFiles: string[], prompt: string)
         );
       }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error writing prompt.txt:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     vscode.window.showErrorMessage(
-      `Failed to write to prompt.txt: ${error.message || error}`
+      `Failed to write to prompt.txt: ${errorMessage}`
     );
   }
 }

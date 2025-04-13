@@ -1,14 +1,18 @@
 .vscode/**
 .vscode-test/**
+src/**
 out/**
 node_modules/**
-src/**
 .gitignore
 .yarnrc
-esbuild.js
+webpack.config.js
 vsc-extension-quickstart.md
 **/tsconfig.json
-**/eslint.config.mjs
+**/.eslintrc.json
 **/*.map
 **/*.ts
-**/.vscode-test.*
+
+# No ignorar estas carpetas y archivos esenciales
+!dist/**
+!webview/**
+!src/webview/**

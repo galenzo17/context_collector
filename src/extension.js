@@ -55,7 +55,9 @@ class PromptFileBuilderViewProvider {
         webviewView.webview.options = {
             enableScripts: true,
             localResourceRoots: [
-                vscode.Uri.joinPath(this._extensionUri, 'src', 'webview'),
+                vscode.Uri.joinPath(this._extensionUri, 'webview'),
+                vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview'),
+                this._extensionUri
             ],
         };
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
@@ -104,8 +106,26 @@ class PromptFileBuilderViewProvider {
         }
     }
     _getHtmlForWebview(webview) {
-        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'main.js'));
-        const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'style.css'));
+        // Intenta diferentes posibles ubicaciones para los recursos
+        let scriptUri;
+        let styleUri;
+        try {
+            // Intenta primero con rutas relativas a la raíz de la extensión
+            scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'webview', 'main.js'));
+            styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'webview', 'style.css'));
+        }
+        catch (error) {
+            try {
+                // Intenta con la carpeta dist
+                scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview', 'main.js'));
+                styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'webview', 'style.css'));
+            }
+            catch (innerError) {
+                // Fallback a la estructura original
+                scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'main.js'));
+                styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'src', 'webview', 'style.css'));
+            }
+        }
         const nonce = getNonce();
         return `<!DOCTYPE html>
             <html lang="en">
@@ -181,9 +201,10 @@ async function copySelectedFilesContent(selectedFiles, prompt) {
                     combinedContent += fileContent;
                     combinedContent += `\n\n--- END FILE: ${relativePath} ---\n\n`;
                 }
-                catch (readError) {
-                    console.error(`Error reading file ${relativePath}:`, readError);
-                    combinedContent += `--- ERROR READING FILE: ${relativePath} (${readError.message || 'Unknown error'}) ---\n\n`;
+                catch (error) {
+                    console.error(`Error reading file ${relativePath}:`, error);
+                    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                    combinedContent += `--- ERROR READING FILE: ${relativePath} (${errorMessage}) ---\n\n`;
                 }
             }
             progress.report({ increment: 100, message: 'Writing prompt.txt...' });
@@ -193,7 +214,8 @@ async function copySelectedFilesContent(selectedFiles, prompt) {
     }
     catch (error) {
         console.error('Error writing prompt.txt:', error);
-        vscode.window.showErrorMessage(`Failed to write to prompt.txt: ${error.message || error}`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        vscode.window.showErrorMessage(`Failed to write to prompt.txt: ${errorMessage}`);
     }
 }
 function getNonce() {
