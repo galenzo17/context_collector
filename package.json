@@ -3,7 +3,7 @@
   "displayName": "Prompt File Builder",
   "description": "Select files from your workspace, add a custom prompt, and generate a combined 'prompt.txt' file.",
   "version": "0.1.0",
-  "publisher": "3ac6cf10-706d-6b60-899e-c49307cdc013",
+  "publisher": "AgustinBereciartuaCastillo",
   "engines": {
     "vscode": "^1.80.0"
   },
