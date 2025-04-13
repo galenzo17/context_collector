@@ -1,16 +1,14 @@
-// Asegúrate de que este script se ejecute después de que el DOM esté listo
 (() => {
-  // Obtenemos una referencia a la API de VS Code exclusiva del webview
   const vscode = acquireVsCodeApi();
 
   const fileListElement = document.getElementById('file-list');
   const searchBox = document.getElementById('search-box');
   const copyButton = document.getElementById('copy-button');
-  let allFilesData = []; // Guardamos los datos originales para filtrar
+  const promptInput = document.getElementById('prompt-input');
+  let allFilesData = [];
 
-  // --- MANEJO DE MENSAJES DESDE LA EXTENSIÓN ---
   window.addEventListener('message', (event) => {
-    const message = event.data; // El objeto JSON enviado desde la extensión
+    const message = event.data;
 
     switch (message.command) {
       case 'loadFiles':
@@ -18,78 +16,91 @@
         renderFileList(allFilesData);
         break;
       case 'showError':
-        fileListElement.innerHTML = `<li>Error: ${message.text}</li>`;
+        if (fileListElement) {
+            fileListElement.innerHTML = `<li>Error: ${message.text}</li>`;
+        } else {
+            console.error("fileListElement not found for error message");
+        }
         break;
     }
   });
 
-  // --- RENDERIZADO DE LA LISTA ---
   function renderFileList(files) {
-    if (!fileListElement) {return;}
+    if (!fileListElement) { return; }
     if (files.length === 0 && allFilesData.length > 0) {
       fileListElement.innerHTML = '<li>No files match your search.</li>';
       return;
     }
     if (files.length === 0) {
       fileListElement.innerHTML =
-        '<li>No files found in workspace (excluding node_modules, .git, prompt.txt).</li>';
+        '<li>No suitable files found in workspace (check exclusion settings).</li>';
       return;
     }
 
-    fileListElement.innerHTML = ''; // Limpiar lista anterior
+    fileListElement.innerHTML = '';
     files.forEach((filePath) => {
       const listItem = document.createElement('li');
+      const escapedFilePath = filePath.replace(/</g, "<").replace(/>/g, ">");
       listItem.innerHTML = `
-                 <input type="checkbox" value="${filePath}">
-                 <span>${filePath}</span>
-             `;
-      // Hacer que hacer clic en el texto también marque/desmarque el checkbox
-      listItem.addEventListener('click', (e) => {
-        if (e.target.tagName !== 'INPUT') {
-          const checkbox = listItem.querySelector('input[type="checkbox"]');
-          if (checkbox) {
-            checkbox.checked = !checkbox.checked;
-          }
-        }
+         <label class="file-item-label">
+             <input type="checkbox" value="${escapedFilePath}" data-filepath="${filePath}">
+             <span>${escapedFilePath}</span>
+         </label>
+      `;
+      listItem.querySelector('.file-item-label').addEventListener('click', (e) => {
+           if (e.target.tagName === 'INPUT') {
+               return;
+           }
+           const checkbox = listItem.querySelector('input[type="checkbox"]');
+           if (checkbox) {
+               checkbox.checked = !checkbox.checked;
+           }
       });
       fileListElement.appendChild(listItem);
     });
   }
 
-  // --- FUNCIONALIDAD DE BÚSQUEDA ---
-  searchBox.addEventListener('input', (e) => {
-    const searchTerm = e.target.value.toLowerCase();
-    const filteredFiles = allFilesData.filter((filePath) =>
-      filePath.toLowerCase().includes(searchTerm)
-    );
-    renderFileList(filteredFiles); // Re-renderizar con los archivos filtrados
-  });
-
-  // --- MANEJO DEL BOTÓN DE COPIAR ---
-  copyButton.addEventListener('click', () => {
-    const selectedCheckboxes = fileListElement.querySelectorAll(
-      'input[type="checkbox"]:checked'
-    );
-    const selectedFiles = Array.from(selectedCheckboxes).map(
-      (checkbox) => checkbox.value
-    );
-
-    if (selectedFiles.length === 0) {
-      // Opcional: Mostrar un mensaje en el webview o dejar que la extensión lo maneje
-      vscode.postMessage({
-        command: 'showWarning', // Comando personalizado si quieres mostrar en VS Code
-        text: 'No files selected.',
+  if (searchBox) {
+      searchBox.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredFiles = allFilesData.filter((filePath) =>
+          filePath.toLowerCase().includes(searchTerm)
+        );
+        renderFileList(filteredFiles);
       });
-      return;
-    }
+  } else {
+      console.error("Search box element not found.");
+  }
 
-    // Enviar la lista de archivos seleccionados a la extensión (backend)
-    vscode.postMessage({
-      command: 'copyContent',
-      files: selectedFiles,
-    });
-  });
 
-  // Solicitar archivos cuando el webview esté listo (opcional, si la carga inicial falla)
-  // vscode.postMessage({ command: 'requestFiles' });
+  if (copyButton) {
+      copyButton.addEventListener('click', () => {
+        const selectedCheckboxes = fileListElement.querySelectorAll(
+          'input[type="checkbox"]:checked'
+        );
+        const selectedFiles = Array.from(selectedCheckboxes).map(
+          (checkbox) => checkbox.dataset.filepath || checkbox.value
+        );
+        const promptText = promptInput ? promptInput.value : '';
+
+        if (selectedFiles.length === 0) {
+          vscode.postMessage({
+            command: 'showWarning',
+            text: 'No files selected.',
+          });
+          return;
+        }
+
+        vscode.postMessage({
+          command: 'copyContent',
+          files: selectedFiles,
+          prompt: promptText,
+        });
+      });
+  } else {
+      console.error("Copy button element not found.");
+  }
+
+  vscode.postMessage({ command: 'requestFiles' });
+
 })();
