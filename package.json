@@ -1,18 +1,21 @@
 {
-  "name": "context-collector",
-  "displayName": "Context Collector",
-  "description": "Select files and copy them to proompt.txt",
-  "version": "0.0.1",
+  "name": "prompt-file-builder",
+  "displayName": "Prompt File Builder",
+  "description": "Select files from your workspace, add a custom prompt, and generate a combined 'prompt.txt' file.",
+  "version": "0.1.0",
+  "publisher": "3ac6cf10-706d-6b60-899e-c49307cdc013",
   "engines": {
-    "vscode": "^1.99.0"
+    "vscode": "^1.80.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Snippets"
   ],
   "activationEvents": [
     "onView:promptFileBuilderView"
   ],
   "main": "./dist/extension.js",
+  "icon": "icon.png",
   "contributes": {
     "viewsContainers": {
       "activitybar": [
@@ -27,44 +30,33 @@
       "prompt-builder-activitybar": [
         {
           "id": "promptFileBuilderView",
-          "name": "Select Files",
+          "name": "Files",
           "type": "webview",
           "contextualTitle": "Prompt File Builder"
         }
       ]
-    },
-    "commands": [
-      {
-        "command": "promptFileBuilder.copyContent",
-        "title": "Copy Selected Content to prompt.txt"
-      }
-    ]
+    }
   },
   "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "npm run watch:esbuild",
-    "watch": "npm run esbuild-watch",
-    "watch:esbuild": "node esbuild.js --watch",
-    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
-    "package": "npm run check-types && npm run lint && node esbuild.js --production",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "check-types": "tsc --noEmit",
-    "lint": "eslint src",
-    "test": "vscode-test"
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
   },
   "devDependencies": {
-    "@types/vscode": "^1.99.0",
-    "@types/mocha": "^10.0.10",
-    "@types/node": "20.x",
-    "@typescript-eslint/eslint-plugin": "^8.28.0",
-    "@typescript-eslint/parser": "^8.28.0",
-    "eslint": "^9.23.0",
-    "esbuild": "^0.25.1",
-    "npm-run-all": "^4.1.5",
-    "typescript": "^5.8.2",
-    "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.4.1"
-  }
+    "@types/vscode": "^1.80.0",
+    "@types/node": "18.x",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "@typescript-eslint/parser": "^6.19.1",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/galenzo17/context_collector"
+  },
+  "bugs": {
+    "url": "https://github.com/galenzo17/context_collector/issues"
+  },
+  "homepage": "https://github.com/galenzo17/context_collector#readme"
 }

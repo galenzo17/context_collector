@@ -1,71 +1,38 @@
-# context-collector README
+# Prompt File Builder
 
-This is the README for your extension "context-collector". After writing up a brief description, we recommend including the following sections.
+Quickly select files from your workspace, add a custom guiding prompt, and generate a single `prompt.txt` file containing the content of all selected files. Ideal for preparing context for Large Language Models (LLMs) or other analysis tools.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+*   **File Selection:** Browse and select files directly from the VS Code sidebar view.
+*   **File Search:** Filter the file list with a simple search box.
+*   **Custom Prompt:** Add your own instructions or context at the beginning of the generated file.
+*   **Generate `prompt.txt`:** Combines the custom prompt and the content of selected files into `prompt.txt` in your workspace root.
+*   **Progress Indicator:** Shows progress while reading files and generating the output.
+*   **Exclusions:** Automatically ignores common folders like `node_modules`, `.git`, build directories, and the `prompt.txt` file itself.
 
-For example if there is an image subfolder under your extension project workspace:
+## How to Use
 
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+1.  Open the "Prompt Builder" view from the Activity Bar (look for the list icon, or the title you set in `package.json`).
+2.  Optionally, type your custom instructions in the "Enter your custom prompt" text area.
+3.  Use the search box to filter files if needed.
+4.  Check the boxes next to the files you want to include.
+5.  Click the "Generate prompt.txt" button.
+6.  A `prompt.txt` file will be created or overwritten in the root of your workspace.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+*   Visual Studio Code version 1.80.0 or higher.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+*   Currently processes files sequentially. Very large numbers of files or extremely large individual files might take some time.
+*   Error handling for file reading is basic; check the `prompt.txt` for any `--- ERROR READING FILE ---` messages.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+See the [CHANGELOG.md](CHANGELOG.md) file.
 
 ---
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
 
 **Enjoy!**
